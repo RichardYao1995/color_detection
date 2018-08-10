@@ -15,16 +15,6 @@
 using namespace std;
 using namespace cv;
 
-//µ÷ÓÃ´Ëº¯ÊýµÄ·½·¨
-//cv::Mat origin_image;
-//vector<cv::Mat> mats;
-//vector<Vec2i> vec = detect_num(origin_image,&mats);(·µ»ØÃ¿¸öÍ£»úÆºµÄÖÐÐÄµã×ø±ê£¬vec2i°üº¬Á½¸öÕûÊý)
-//cout << vec.begin()[0][0];(µÚÒ»¸öÍ£»úÆºÖÐÐÄµãµÄx)
-
-double CalculateTheta(Vec2d &oc, Vec2d &pt_0, Vec2d &pt_x);
-bool PointCmp(Vec2d &a, Vec2d &b, Vec2d &center);
-void ClockSortPoints(std::vector<Vec2d> &vPoints, Vec2d &center, Vec2d &pt_0);
-
 void FindMinMax(int &x_min, int &x_max, int &y_min, int &y_max, Mat image)
 {
 	x_max = 0;
@@ -58,9 +48,7 @@ void ImageThreshold(Mat imgOriginal, Mat &imgThresholded)
 
 	inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded);
 
-	Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));   /*º¯ÊýgetStructuringElement£¬¿ÉÒÔ»ñÈ¡³£ÓÃ
-																   µÄ½á¹¹ÔªËØµÄÐÎ×´£º¾ØÐÎ£¨°üÀ¨ÏßÐÎ£©¡¢ÍÖÔ²£¨°üÀ¨Ô²ÐÎ£©¼°Ê®×ÖÐÎ¡£
-                                                                   MORPH_RECT£¬ MORPH_ELLIPSE£¬ MORPH_CROSS*/
+	Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));   
 	morphologyEx(imgThresholded, imgThresholded, MORPH_OPEN, element);
 
 
@@ -82,62 +70,13 @@ void ImageThreshold(Mat imgOriginal, Mat &imgThresholded)
 		for (int k = 0; k < contours.size(); k++)
 		{
 			if (contourArea(contours[k]) > 10000)
-				approxPolyDP(contours[k], approxPoly, 1, 1);  //¶ÔÍ¼ÏñÂÖÀªµã½øÐÐ¶à±ßÐÎÄâºÏ
+				approxPolyDP(contours[k], approxPoly, 1, 1);  //ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			if (approxPoly.size() == 4)
 				;
 		}
 	}
 
-	imwrite("Thresholded.jpg", imgThresholded);
-
-	//char key = (char)waitKey(30);
-	//if (key == 27)
-	//	std::cout << 0;
-}
-
-inline double CalculateTheta(Vec2d &oc, Vec2d &pt_0, Vec2d &pt_x)
-{
-	double line1_length_2 = sqrt(((pt_0[0] - oc[0])*(pt_0[0] - oc[0]) + (pt_0[1] - oc[1])*(pt_0[1] - oc[1])));
-	double line2_length_2 = sqrt(((pt_x[0] - oc[0])*(pt_x[0] - oc[0]) + (pt_x[1] - oc[1])*(pt_x[1] - oc[1])));
-	double product = (pt_0[0] - oc[0])*(pt_x[0] - oc[0]) + (pt_0[1] - oc[1])*(pt_x[1] - oc[1]);
-	double cos_theta = product / (line1_length_2*line2_length_2);
-	if (PointCmp(pt_0, pt_x, oc))
-		return 6.28 - acos(cos_theta);
-	else
-		return acos(cos_theta);
-}
-
-inline bool PointCmp(Vec2d &a, Vec2d &b, Vec2d &center)
-{
-	int det = (a[0] - center[0]) * (b[1] - center[1]) - (b[0] - center[0]) * (a[1] - center[1]);
-	int mult = (a[0] - center[0]) *(b[0] - center[0]) + (a[1] - center[1]) * (b[1] - center[1]);
-
-	if (det < 0)
-		return true;
-	if (det > 0)
-		return false;
-
-	if (det == 0)
-	{
-		if (mult>0) return false;
-		else return true;
-	}
-}
-
-inline  void ClockSortPoints(std::vector<Vec2d> &vPoints, Vec2d &center, Vec2d &pt_0)
-{
-	for (int i = 0; i < vPoints.size() - 1; i++)
-	{
-		for (int j = 0; j < vPoints.size() - i - 1; j++)
-		{
-			if (CalculateTheta(center, pt_0, vPoints[j])>CalculateTheta(center, pt_0, vPoints[j + 1]))
-			{
-				Vec2d tmp = vPoints[j];
-				vPoints[j] = vPoints[j + 1];
-				vPoints[j + 1] = tmp;
-			}
-		}
-	}
+	//imwrite("Thresholded.jpg", imgThresholded);
 }
 
 void  Two_PassNew(const Mat &bwImg, Mat &labImg)
