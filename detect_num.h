@@ -24,39 +24,39 @@ void FindMinMax(int &x_min, int &x_max, int &y_min, int &y_max, Mat image)
 
 }
 
-void ImageThreshold(Mat imgOriginal, Mat &imgThresholded)
+void ImageThreshold(cv::Mat imgOriginal, cv::Mat &imgThresholded)
 {
 
-	int iLowH = 0;
-	int iHighH = 180;
+        int iLowH = 26;
+        int iHighH = 34;
 
-	int iLowS = 0;
-	int iHighS = 43;
+        int iLowS = 43;
+        int iHighS = 255;
 
-	int iLowV = 221;
+        int iLowV = 46;
 	int iHighV = 255;
 
 
 	bool found = false;
 
-	Mat imgHSV;
+        cv::Mat imgHSV;
 	std::vector<Mat> hsvSplit;
-	cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV);
-	split(imgHSV, hsvSplit);
-	equalizeHist(hsvSplit[2], hsvSplit[2]);
+        cv::cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV);
+        cv::split(imgHSV, hsvSplit);
+        cv::equalizeHist(hsvSplit[2], hsvSplit[2]);
 	merge(hsvSplit, imgHSV);
 
-	inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded);
+        cv::inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded);
 
-	Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));   
-	morphologyEx(imgThresholded, imgThresholded, MORPH_OPEN, element);
+        cv::Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));
+        cv::morphologyEx(imgThresholded, imgThresholded, MORPH_OPEN, element);
 
 
-	morphologyEx(imgThresholded, imgThresholded, MORPH_CLOSE, element);
-	Mat img_canny;
-	Canny(imgThresholded, img_canny, 10, 80);
+        cv::morphologyEx(imgThresholded, imgThresholded, MORPH_CLOSE, element);
+        cv::Mat img_canny;
+        cv::Canny(imgThresholded, img_canny, 10, 80);
 	std::vector<std::vector<Point> > contours, good_contours;
-	findContours(img_canny, contours, CV_RETR_EXTERNAL, CHAIN_APPROX_NONE);
+        cv::findContours(img_canny, contours, CV_RETR_EXTERNAL, CHAIN_APPROX_NONE);
 
 
 	std::vector<Point2f> imagePoints_vertex;
